@@ -10,7 +10,7 @@ from django.test import SimpleTestCase
 @patch('core.management.commands.wait_for_db.Command.check')
 class CommandTest(SimpleTestCase):
     """class to test Command class"""
-    
+
     def test_wait_for_db_ready(self, patched_check):
         """test case when db is ready"""
         patched_check.return_value = True
