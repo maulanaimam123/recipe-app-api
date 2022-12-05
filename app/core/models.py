@@ -12,8 +12,20 @@ from django.contrib.auth.models import (
 class UserManager(BaseUserManager):
     """Manager for users"""
     def create_user(self, email, password=None, **extra_fields):
-        user = self.model(email=email, **extra_fields)
+        """Create normal user"""
+        if not email:
+            raise ValueError('User email must not be empty')
+        user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
+    def create_superuser(self, email, password):
+        """Create superuser"""
+        user = self.create_user(email, password)
+        user.is_staff = True
+        user.is_superuser = True
         user.save(using=self._db)
 
         return user
