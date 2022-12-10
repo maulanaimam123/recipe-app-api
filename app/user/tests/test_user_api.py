@@ -11,6 +11,7 @@ from rest_framework import status
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse('user:me')
 
 
 def create_user(**params):
@@ -120,3 +121,45 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', res.data)
+
+    def test_retrieve_me_unauthorized(self):
+        """Test unauth user umable to access to me url"""
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class PrivateUserApiTests(TestCase):
+    def setUp(self):
+        self.user = {
+            'email': 'test@example.com',
+            'password': 'dummypass123',
+            'name': 'Test Name'
+        }
+        self.client = APIClient()
+        self.client.force_authenticate(user = self.user)
+
+    def test_retrieve_me_authorized(self):
+        """Test user with auth able to access me url"""
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data.name, self.user['name'])
+        self.assertEqual(res.data.email, self.user['email'])
+
+    def test_post_me_not_allowed(self):
+        """Test post request to me url not allowed"""
+        res = self.client.post(ME_URL, {})
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_user_profile(self):
+        """Test patch request to update user profile"""
+        payload = {'name': 'Updated name', 'password': 'newPassword123'}
+
+        res = self.client.patch(ME_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.name, payload['name'])
+        self.assertTrue(self.user.check_password(payload['password']))
