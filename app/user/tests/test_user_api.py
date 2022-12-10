@@ -128,23 +128,26 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+
 class PrivateUserApiTests(TestCase):
     def setUp(self):
-        self.user = {
-            'email': 'test@example.com',
-            'password': 'dummypass123',
-            'name': 'Test Name'
-        }
+        self.user = create_user(
+            email='test@example.com',
+            password='dummypass123',
+            name='Test Name'
+        )
         self.client = APIClient()
-        self.client.force_authenticate(user = self.user)
+        self.client.force_authenticate(user=self.user)
 
     def test_retrieve_me_authorized(self):
         """Test user with auth able to access me url"""
         res = self.client.get(ME_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data.name, self.user['name'])
-        self.assertEqual(res.data.email, self.user['email'])
+        self.assertEqual(res.data, {
+            'name': self.user.name,
+            'email': self.user.email,
+        })
 
     def test_post_me_not_allowed(self):
         """Test post request to me url not allowed"""
