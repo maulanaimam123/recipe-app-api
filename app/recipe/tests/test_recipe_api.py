@@ -315,7 +315,10 @@ class PrivateRecipeApiTests(TestCase):
         Test creating recipe with existing ingredients
         expect to assign existing ingredients
         """
-        ingredient_chilli = Ingredient.objects.create(user=self.user, name='Chilli')
+        ingredient_chilli = Ingredient.objects.create(
+            user=self.user,
+            name='Chilli',
+        )
         payload = {
             'title': 'Thai Prawn Curry',
             'time_minutes': 30,
@@ -351,18 +354,18 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_update_recipe_assign_ingredient(self):
         """Test assigning an existing ingredient when updating a recipe."""
-        ingredient_breakfast = Ingredient.objects.create(user=self.user, name='Egg')
+        ing_egg = Ingredient.objects.create(user=self.user, name='Egg')
         recipe = create_recipe(user=self.user)
-        recipe.ingredients.add(ingredient_breakfast)
+        recipe.ingredients.add(ing_egg)
 
-        ingredient_lunch = Ingredient.objects.create(user=self.user, name='Bacon')
+        ing_bacon = Ingredient.objects.create(user=self.user, name='Bacon')
         payload = {'ingredients': [{'name': 'Bacon'}]}
         url = detail_url(recipe.id)
         res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn(ingredient_lunch, recipe.ingredients.all())
-        self.assertNotIn(ingredient_breakfast, recipe.ingredients.all())
+        self.assertIn(ing_bacon, recipe.ingredients.all())
+        self.assertNotIn(ing_egg, recipe.ingredients.all())
 
     def test_clear_recipe_ingredients(self):
         """Test clearing a recipes ingredients."""
