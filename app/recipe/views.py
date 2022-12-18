@@ -49,8 +49,8 @@ class TagViewSet(
         viewsets.GenericViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
-    authentication_class = [authentication.TokenAuthentication]
-    permission_class = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """Override to filter by user-id"""
